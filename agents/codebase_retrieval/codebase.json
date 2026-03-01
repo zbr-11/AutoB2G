@@ -1,0 +1,172 @@
+[
+    {
+        "function_name": "build_neighborhood_schema",
+        "stage": "neighborhood_build",
+        "required": false,
+        "condition_key": "use_neighborhood",
+        "depends_on": [],
+        "inputs": [
+            "idd_filepath",
+            "sample_count",
+            "filters",
+            "delete_energyplus_simulation_output"
+        ],
+        "outputs": [
+            "schema_path"
+        ],
+        "description": "Generate CityLearn neighborhood schema using EnergyPlus."
+    },
+    {
+        "function_name": "create_citylearn_env",
+        "stage": "env_setup",
+        "required": true,
+        "depends_on": [],
+        "inputs": [
+            "dataset",
+            "central",
+            "use_neighborhood",
+            "idd_filepath",
+            "neighborhood_schema_path",
+            "neighborhood_build_kwargs",
+            "optimize_grid",
+            "node_building_number"
+        ],
+        "outputs": [
+            "env"
+        ],
+        "description": "Create CityLearn environment with optional grid-based reward."
+    },
+    {
+        "function_name": "create_citylearn_agent",
+        "stage": "agent_training",
+        "required": true,
+        "depends_on": [
+            "create_citylearn_env"
+        ],
+        "inputs": [
+            "env",
+            "strategy",
+            "episodes"
+        ],
+        "outputs": [
+            "agent"
+        ],
+        "description": "Initialize and optionally train control agent."
+    },
+    {
+        "function_name": "evaluate_citylearn_kpis",
+        "stage": "control_simulation",
+        "required": false,
+        "depends_on": [
+            "create_citylearn_agent"
+        ],
+        "inputs": [
+            "agent"
+        ],
+        "outputs": [
+            "kpis"
+        ],
+        "description": "Evaluate trained CityLearn agent."
+    },
+    {
+        "function_name": "run_citylearn",
+        "stage": "control_simulation",
+        "required": false,
+        "depends_on": [
+            "create_citylearn_agent"
+        ],
+        "inputs": [
+            "strategy",
+            "episodes",
+            "central",
+            "dataset",
+            "use_neighborhood",
+            "idd_filepath",
+            "neighborhood_schema_path",
+            "neighborhood_build_kwargs",
+            "optimize_grid",
+            "node_building_number"
+        ],
+        "outputs": [
+            "building_kw",
+            "model"
+        ],
+        "description": "Run CityLearn simulation and produce building load profile."
+    },
+    {
+        "function_name": "load_network",
+        "stage": "grid_init",
+        "required": false,
+        "depends_on": [
+            "run_citylearn"
+        ],
+        "inputs": [
+            "case_name"
+        ],
+        "outputs": [
+            "net"
+        ],
+        "description": "Load pandapower test network."
+    },
+    {
+        "function_name": "run_grid",
+        "stage": "grid_analysis",
+        "required": false,
+        "depends_on": [
+            "load_network",
+            "run_citylearn"
+        ],
+        "inputs": [
+            "building_kw",
+            "net"
+        ],
+        "outputs": [
+            "grid_results"
+        ],
+        "description": "Run single time-series powerflow with system total load."
+    },
+    {
+        "function_name": "plot_grid_results",
+        "stage": "grid_postprocessing",
+        "required": false,
+        "depends_on": [
+            "run_grid"
+        ],
+        "inputs": [
+            "grid_results"
+        ],
+        "outputs": [],
+        "description": "Generate voltage and line loading figures."
+    },
+    {
+        "function_name": "save_grid_results",
+        "stage": "grid_postprocessing",
+        "required": false,
+        "depends_on": [
+            "run_grid"
+        ],
+        "inputs": [
+            "grid_results"
+        ],
+        "outputs": [],
+        "description": "Save time-series grid results to CSV."
+    },
+    {
+        "function_name": "analyze_n1",
+        "stage": "grid_resilience",
+        "required": false,
+        "depends_on": [
+            "load_network",
+            "run_citylearn"
+        ],
+        "inputs": [
+            "net",
+            "building_kw",
+            "vm_tol",
+            "loading_threshold",
+            "T_run"
+        ],
+        "outputs": [],
+        "description": "Run N-1 contingency analysis based on system total load."
+    }
+]
