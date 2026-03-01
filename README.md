@@ -1,7 +1,6 @@
 # AutoB2G
 
-AutoB2G is a building–grid co-simulation framework that integrates building-level energy control (CityLearn) with power system analysis (Pandapower), and leverages the SOCIA framework to enable natural language–driven workflow orchestration. 
-It supports coordinated evaluation of demand response strategies and their impact on distribution grid performance.
+AutoB2G is a building–grid co-simulation framework that integrates building-level energy control ([CityLearn V2](https://www.tandfonline.com/doi/full/10.1080/19401493.2024.2418813)) with power system analysis (Pandapower), and leverages the large language model–based [SOCIA](https://arxiv.org/abs/2505.12006) framework to enable natural language–driven simulation automation. It supports coordinated evaluation of demand response strategies and their impact on distribution grid performance.
 
 ---
 
